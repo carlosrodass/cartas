@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+    use App\Models\User;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Hash;
@@ -74,39 +74,61 @@ class UserController extends Controller
         return response()->json(compact('user','token'),201);
     }
 
+    public function resetPass(Request $request){
 
-    public function createCard(){
+        $response = "";
+        //Obtener email
+        //Leer el contenido de la petición
+        $email = $request->get('email');
 
-    	$response = "empty";
+        //Comprobacion email en bd
+        $var = DB::table('users')
+        ->where('email', '=', $email)
+        ->get('password');
 
-    	//-->si el usuario tiene rol de admin
-    	//crear carta
+        //Create Password Reset 
+          DB::table('users')->insert([
 
-    	//Validacion de token de usuario
-    	try {
+            'password' => str_random(60)
+        ]);
 
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['user_not_found'], 404);
-        }
-        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-                return response()->json(['token_expired'], $e->getStatusCode());
-        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-                return response()->json(['token_invalid'], $e->getStatusCode());
-        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-                return response()->json(['token_absent'], $e->getStatusCode());
-        }
+        return $var;
+
+    }
 
 
-    	$role = DB::table('users')
-        ->get('role');
+    // public function createCard(){
+
+    // 	$response = "empty";
+
+    // 	//-->si el usuario tiene rol de admin
+    // 	//crear carta
+
+    // 	//Validacion de token de usuario
+    // 	try {
+
+    //     if (!$user = JWTAuth::parseToken()->authenticate()) {
+    //             return response()->json(['user_not_found'], 404);
+    //     }
+    //     } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+    //             return response()->json(['token_expired'], $e->getStatusCode());
+    //     } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+    //             return response()->json(['token_invalid'], $e->getStatusCode());
+    //     } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+    //             return response()->json(['token_absent'], $e->getStatusCode());
+    //     }
+
+
+    // 	$role = DB::table('users')
+    //     ->get('role');
     	
 
-    	return $response;
+    // 	return $response;
 
 
-    	//--> si el usuario no tiene rol de admin
-    	//No puedes crear una carta
-    }
+    // 	//--> si el usuario no tiene rol de admin
+    // 	//No puedes crear una carta
+    // }
 
 
 

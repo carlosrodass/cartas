@@ -23,6 +23,7 @@ class Card extends Model
         'card_name',
         'description',
         'collection',
+        'user_id'
     ];
 
      /**
