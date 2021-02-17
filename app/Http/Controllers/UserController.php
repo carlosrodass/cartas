@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
     use App\Models\User;
+    use Illuminate\Support\Str;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Hash;
@@ -16,8 +17,8 @@ class UserController extends Controller
 
 	//User login
     public function authenticate(Request $request)
-    {
-    $credentials = $request->only('username', 'password');
+    { 
+        $credentials = $request->only('username', 'password');
     try {
         if (! $token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'invalid_credentials'], 400);
@@ -53,27 +54,34 @@ class UserController extends Controller
     //User register
     public function register(Request $request)
     {
-            $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string'
-        ]);
+        $response = "";
 
-        if($validator->fails()){
-                return response()->json($validator->errors()->toJson(), 400);
+        $data = $request->getContent();
+
+        $data = json_decode($data);
+
+
+        if($data){
+            $user = new User();
+            $user->username = $data->username;
+            $user->email = $data->email;
+            $user->password = Hash::make($data->password);
+            $user->role = $data->role;
+
+            try{
+                $user->save();
+                $response = "Registro completado";
+            }catch(\Exception $e){
+                $fail=$e->getMessage();
+                $response = "Registro erroneo " . $fail;
+            }
+
+        }else{
+            $response = "No has introducido datos";
         }
 
-        $user = User::create([
-            'username' => $request->get('username'),
-            'email' => $request->get('email'),
-            'password' => Hash::make($request->get('password')),
-            'role' => $request->get('role')
-        ]);
 
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(compact('user','token'),201);
+        return $response;
     }
 
     //Recuperar contraseña 
@@ -82,21 +90,22 @@ class UserController extends Controller
         $response="";
 
         //Recogiendo los datos escritos por el usuario
-        $data = $request->get('email');
+        $data = $request->getContent();
         // Decodificar el json
-        // $data = json_decode($data);
-        //Buscando usuario por email
+        $data = json_decode($data);
+       
 
         if($data){
-            $user = User::where('email', $data-> email)->get()->first();
-                 //Si existe el usuario
+             //Buscando usuario por email
+            $user = User::where('email', $data)->get()->first();
+            //Si existe el usuario
             if($user) {
                 
                 $password= "";
                 //Generar nueva contraseña
-                $password= Str::random(15);
+                $password = Str::random(15);
                 //Reseteando contraseña
-                // $user->password = Hash::make($password);
+                $user->password = Hash::make($password);
                 $user->password = $password;
                 
                 try{
@@ -119,41 +128,4 @@ class UserController extends Controller
         return $response;
 
     }
-
-
-    // public function createCard(){
-
-    // 	$response = "empty";
-
-    // 	//-->si el usuario tiene rol de admin
-    // 	//crear carta
-
-    // 	//Validacion de token de usuario
-    // 	try {
-
-    //     if (!$user = JWTAuth::parseToken()->authenticate()) {
-    //             return response()->json(['user_not_found'], 404);
-    //     }
-    //     } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-    //             return response()->json(['token_expired'], $e->getStatusCode());
-    //     } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-    //             return response()->json(['token_invalid'], $e->getStatusCode());
-    //     } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-    //             return response()->json(['token_absent'], $e->getStatusCode());
-    //     }
-
-
-    // 	$role = DB::table('users')
-    //     ->get('role');
-    	
-
-    // 	return $response;
-
-
-    // 	//--> si el usuario no tiene rol de admin
-    // 	//No puedes crear una carta
-    // }
-
-
-
 }
