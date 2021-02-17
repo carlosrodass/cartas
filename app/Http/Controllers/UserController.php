@@ -44,6 +44,8 @@ class UserController extends Controller
         } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
                 return response()->json(['token_absent'], $e->getStatusCode());
         }
+
+        
         return response()->json(compact('user'));
     }
 
@@ -74,25 +76,47 @@ class UserController extends Controller
         return response()->json(compact('user','token'),201);
     }
 
+    //Recuperar contraseña 
     public function resetPass(Request $request){
 
-        $response = "";
-        //Obtener email
-        //Leer el contenido de la petición
-        $email = $request->get('email');
+        $response="";
 
-        //Comprobacion email en bd
-        $var = DB::table('users')
-        ->where('email', '=', $email)
-        ->get('password');
+        //Recogiendo los datos escritos por el usuario
+        $data = $request->get('email');
+        // Decodificar el json
+        // $data = json_decode($data);
+        //Buscando usuario por email
 
-        //Create Password Reset 
-          DB::table('users')->insert([
+        if($data){
+            $user = User::where('email', $data-> email)->get()->first();
+                 //Si existe el usuario
+            if($user) {
+                
+                $password= "";
+                //Generar nueva contraseña
+                $password= Str::random(15);
+                //Reseteando contraseña
+                // $user->password = Hash::make($password);
+                $user->password = $password;
+                
+                try{
+                    //Guardando contraseña
+                    $user->save();
+                    $response="Nueva contraseña: ".$password;
+                } catch(\Exception $e){
+                    $response=$e->getMessage();
+                    }
 
-            'password' => str_random(60)
-        ]);
+                }else{
+                    $response="No se encuentra user";
+                }
 
-        return $var;
+        }else{
+            $response = "No hay datos";
+        }
+
+
+        return $response;
 
     }
 
