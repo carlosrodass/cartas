@@ -4,8 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 //Registro y login de usuario
-Route::post('register', 'App\Http\Controllers\UserController@register');
-Route::post('login', 'App\Http\Controllers\UserController@authenticate');
+Route::post('register', 'App\Http\Controllers\UserController@signUp');
+Route::post('login', 'App\Http\Controllers\UserController@SignIn');
 Route::post('reset', 'App\Http\Controllers\UserController@resetPass');
 Route::post('createCard','App\Http\Controllers\cardController@createCard');
 Route::post('createCollection','App\Http\Controllers\collectionController@createCollection');
