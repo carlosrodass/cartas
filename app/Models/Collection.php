@@ -26,20 +26,4 @@ class Collection extends Model
     ];
 
 
-    /**
-     * Get the User for cards.
-     */
-    public function users()
-    {
-        return $this->belongsTo(User::class); //One to Many inverse
-    }
-
-
-     /**
-     * get cards for collections.
-     */
-    public function cards()
-    {
-        return $this->belongsToMany(Card::class); //Many to Many
-    }
 }

@@ -10,21 +10,26 @@ use App\Models\Collection;
 use App\Models\cardCollection;
 
 class CollectionController extends Controller
-{
+{   
+    /*
+    *creando colecciones
+    */
     public function createCollection(Request $request){
         
         $response= "";
-    
         //Recibiendo informacion dada por el usuario
-        $data = $request->getContent();
-        
+        $data = $request->getContent();    
         //Decoficando el json recibido
         $data = json_decode($data);
 
         if($data){
-             $collection = new Collection();
 
-             $collection = DB::table('collections')
+            $collection = new Collection();
+            $key = MyJWT::getKey();
+            $headers = getallheaders();
+            $decoded = JWT::decode($headers['token'], $key, array('HS256'));
+
+            $collection = DB::table('collections')
                 ->where('collection_name', '=', $data->collection_name)
                 ->get();
 
@@ -35,50 +40,56 @@ class CollectionController extends Controller
                 $collection->collection_name = $data->collection_name; //collection_name
                 $collection->image = $data->image; //image
                 $collection->publish_date = $data->publish_date; //publish_date
-                $collection->user_id = $data->user_id;
+                $collection->user_id = $decoded->id; //ID usuario creador
 
                 $card = new Card();
-                $card->card_name = $data->card_name;
-                $card->description=$data->description;
+                $card->card_name = 'default';
+                $card->description='default';
                 $card->collection = $collection->collection_name;
-                $card->user_id = $data->user_id;
+                $card->user_id = $decoded->id;
 
-                 try{
+                try{
                     $collection->save();
                     $card->save();
-                    
-                    $card_id=$card->id;
-                    $collection_id=$collection->id;
+                    $response = response()->json(['Success' => 'Carta y coleccion creadas'], 200);
 
-                    $response="OK";
                 } catch(\Exception $e){
-                    $response=$e->getMessage();
+                    $response = response()->json(['Error' => $e]);
                 }
 
+                //Rellenando tabla intermedia
                 $cardCollection = new cardCollection();
-                $cardCollection->card_id = $card_id;
-                $cardCollection->collection_id =$collection_id;
-                $cardCollection->save();
+                $cardCollection->card_id = $card->id;
+                $cardCollection->collection_id =$collection->id;
 
-               $response = "coleccion ha sido creada";
+                try{
+                    $cardCollection->save();
+                    $response = response()->json(['Success' => 'tabla intermedia completa'], 200);
+
+                }catch(\Exception $e){
+                    $response = response()->json(['Error' => $e]);
+                }
+                
+
+               $response = response()->json(['Success' => 'Coleccion creada'], 200);
 
             }else{
                 
-                $response = "coleccion ya existe";
+                $response = response()->json(['Failure' => 'Coleccion ya existe']);
             }
             
             
 
         }else{
-            $response = "Empty data";
+            $response = response()->json(['Error' => 'No has introducido datos']);
         }
-       //pedir nombre, imagen y fecha de edicion
 
-       //save coleccion
         return $response;
     }
 
-
+    /*
+    *editando colecciones
+    */
     public function updateCollection(){
 
     }

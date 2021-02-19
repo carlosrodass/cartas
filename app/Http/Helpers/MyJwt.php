@@ -10,15 +10,15 @@ class MyJWT{
 
     public static function generatePayload($user){
         $payload = array(
-            'username' => $user->username,
-            'email' => $user->email,
-            'password' => $user->password,
+            
             'role' => $user->role,
+            'id' => $user->id
         
         );
 
         return $payload;
     }
+
 
     public static function getKey(){
         return self::KEY;

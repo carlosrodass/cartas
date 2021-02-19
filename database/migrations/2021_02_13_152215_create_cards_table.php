@@ -20,9 +20,11 @@ class CreateCardsTable extends Migration
             $table->string('card_name');
             $table->string('description');
             $table->string('collection');
+
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
+
         });
     }
 
@@ -33,6 +35,7 @@ class CreateCardsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cards');
+        // Schema::dropIfExists('cards');
+        
     }
 }

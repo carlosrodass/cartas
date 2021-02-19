@@ -34,6 +34,6 @@ class CreateCardsCollectionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cards_collections');
+        // Schema::dropIfExists('cards_collections');
     }
 }

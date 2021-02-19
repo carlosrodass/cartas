@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
     use App\Models\User;
+    use App\Http\Helpers\MyJWT;
     use Illuminate\Support\Str;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
@@ -14,27 +15,10 @@ namespace App\Http\Controllers;
 
 class UserController extends Controller
 {
-    //User profile
-    public function getAuthenticatedUser()
-    {
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['user_not_found'], 404);
-        }
-        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-                return response()->json(['token_expired'], $e->getStatusCode());
-        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-                return response()->json(['token_invalid'], $e->getStatusCode());
-        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-                return response()->json(['token_absent'], $e->getStatusCode());
-        }
 
-        
-        return response()->json(compact('user'));
-    }
-
-
-    //User register
+    /**
+    *Registro de usuario 
+    */
     public function signUp(Request $request)
     {
         $response = "";
@@ -49,21 +33,17 @@ class UserController extends Controller
             $user->password = Hash::make($data->password);
             $user->role = $data->role;
 
-            //Encodificando los datos del usuario para enviarlos
-            // $jwt = JWT::encode($payload, $key);
-
             try{
                 $user->save();
-                $response = "Usuario registrado";
-                // $response = array('token'->$jwt);
+                $response = response()->json(['Success' => 'Usuario registrado']);
 
             }catch(\Exception $e){
                 $fail=$e->getMessage();
-                $response = "Registro erroneo " . $fail;
+                $response = response()->json(['Error' => $fail]);
             }
 
         }else{
-            $response = "No has introducido datos";
+            $response = response()->json(['Empty' => 'No has introducido datos']);
         }
 
 
@@ -71,7 +51,9 @@ class UserController extends Controller
     }
 
 
-    	//User login
+    /**
+    *Login de usuario 
+    */
     public function SignIn(Request $request)
     { 
         $response = "";
@@ -91,14 +73,10 @@ class UserController extends Controller
                 //Comprobando la contraseña del usuario sea igual que la introducida
                 if(Hash::check($data->password,$user->password)){
 
-                    $key = "dfhdjfdshhfuhs894uu48r5et/*/9+6+fdsfshiushkudsh2y2838urfdsjkcj";
-            
-                    $payload = array(
-                        // "username" => $request->username,
-                        "email" => $request->email,
-                        "password" => $request->password,
-                        // "role" => $request->role,      
-                    );
+
+                    $payload = MyJWT::generatePayload($user);
+                    $key = MyJWT::getKey(); 
+                    //Encodificando los datos del usuario para enviarlos
                     $jwt = JWT::encode($payload, $key);
 
                     try{
@@ -129,7 +107,9 @@ class UserController extends Controller
         return $response;
     }
 
-    //Recuperar contraseña 
+    /**
+    *Recuperar contraseña de usuario 
+    */
     public function resetPass(Request $request){
 
         $response="";
@@ -142,7 +122,7 @@ class UserController extends Controller
 
         if($data){
              //Buscando usuario por email
-            $user = User::where('email', $data)->get()->first();
+            $user = User::where('email', $data->email)->get()->first();
             //Si existe el usuario
             if($user) {
                 
@@ -156,17 +136,17 @@ class UserController extends Controller
                 try{
                     //Guardando contraseña
                     $user->save();
-                    $response="Nueva contraseña: ".$password;
+                    $response = response()->json(['New password' => $password]);
                 } catch(\Exception $e){
                     $response=$e->getMessage();
                     }
 
                 }else{
-                    $response="No se encuentra user";
+                    $response = response()->json(['Error' => 'Usuario no encontrado']);
                 }
 
         }else{
-            $response = "No hay datos";
+            $response = response()->json(['Error' => 'No hay datos']);
         }
 
 

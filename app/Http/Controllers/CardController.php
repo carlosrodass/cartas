@@ -7,86 +7,110 @@ use App\Models\User;
 use App\Models\Card;
 use App\Models\Collection;
 use App\Models\cardCollection;
+use \Firebase\JWT\JWT;
+use App\Http\Helpers\MyJWT;
 
 class CardController extends Controller
 {
-    public function createCard(Request $request){
-        //, $token
+   
+   /*
+    *Creando cartas
+    */
+    public function createCard(Request $request)
+    {
     
-    $response= "";
-    
-    //Recibiendo informacion dada por el usuario
-    $data = $request->getContent();
-    //Decodificando el json en String
-    $data = json_decode($data);
-    
-    //Si existend datos
-    if($data){
+        $response= "";
+        $data = $request->getContent();
+        $data = json_decode($data);
+        
+        //Si existend datos
+        if($data){
 
-        $card = new Card();
-        //Obteniendo la coleccion que tenga el mismo nombre dado por el usuario en el campo coleccion
-        $collection = Collection::where('collection_name', $data->collection)->get()->first();
-        // $user = User::where('password',$token)->get()->first();
-        $user = User::where('id', 1)->get()->first();
-        //Si la coleccion existe
-        if($collection){
+            $card = new Card();
+            
+            $key = MyJWT::getKey();
+            $headers = getallheaders();                
+            $decoded = JWT::decode($headers['token'], $key, array('HS256'));
 
             //Relleno los datos de la carta
-            $card->card_name = $data->card_name; //card_name
-            $card->description = $data-> description; //Description
-            $card->collection = $data-> collection; //Collection
-            $card->user_id = $user->id; //Id del usuario creador
+            $card->card_name = $data->card_name; 
+            $card->description = $data->description; 
+            $card->collection = $collection->collection_name;
+            $card->user_id = $decoded->id; //Id del usuario creador
 
             try{
                 $card->save();
-                $card_id=$card->id;
-                $response="OK";
+                $response = response()->json(['Success' => 'Carta registrada'], 200);
             } catch(\Exception $e){
-                $response=$e->getMessage();
+                // $response=$e->getMessage();
+                $response = response()->json(['Error' => $e]);
             }
 
-            //Rellenando la tabla intermedia
-            $cardCollection = new cardCollection();
-            $cardCollection->card_id =$card_id;
-            $cardCollection->collection_id =  $collection->id;
-            $cardCollection->save();
-        }
-        //Si no existe la coleccion
-        else{
-            $collection= new Collection();
-            $collection->name = $data->collection;
-            $card->name = $data->card_name;
-            $card->description = $data->description;
-            $card->collection=$data->collection;
-            $card->user_id=$user->id;
-            try{
-                $card->save();
-                $collection->save();
-                $card_id=$card->id;
-                $collection_id=$collection->id;
-                $response="Succes";
-            } catch(\Exception $e){
-                $response=$e->getMessage();
+            //Obteniendo la coleccion que tenga el mismo nombre dado por el usuario en el campo coleccion
+            $collection = Collection::where('collection_name', $data->collection)->get()->first();
+            
+            //Si la coleccion existe
+            if($collection){
+            
+                $cardCollection = new CardCollection();
+                //Rellenando la tabla intermedia
+                $cardCollection->card_id =$card->id; //ID de la carta creada
+                $cardCollection->collection_id =$collection->id; //ID de la coleccion a la que pertenece dicha carta
+                try{
+                    $cardCollection->save();
+                    $response = response()->json(['Success' => 'Completado']);
+                }catch(\Exception $e){
+                    // $response = $e->getMessage();
+                    $response = response()->json(['Error' => $e]);
+                }
+                
             }
-            $cardCollection = new cardCollection();
-            $cardCollection->card_id =1;
-            $cardCollection->collection_id = $collection->id; 
-            $cardCollection->save(); 
+            //Si NO existe la coleccion
+            else{
+                //Creando la coleccion
+                $collection= new Collection();
+                $collection->collection_name = 'default';
+                $collection->image = 'default';
+                $collection->publish_date = 'default';
+                $collection->user_id = $decoded->id;
+                
+                try{
+                    //Guardando la coleccion recien creada
+                    $collection->save();
+                    $response = response()->json(['Success' => 'Coleccion creada'], 200); 
+
+                } catch(\Exception $e){
+                    $response = response()->json(['Error' => $e]);
+                }
+
+                $cardCollection = new cardCollection();
+                $cardCollection->card_id = $card->id;
+                $cardCollection->collection_id = $collection->id;
+
+                try{
+                    //Guardando la coleccion recien creada
+                    $cardCollection->save();
+                    $response = response()->json(['Success' => 'tabla intermedia creada'], 200); 
+
+                }catch(\Exception $e){
+                    $response = response()->json(['Error' => $e]);
+                }
+                
+            }
+
+        //Si no existen datos
+        }else{
+            
+            $response = response()->json(['Error' => 'Introduce datos'], 400); 
         }
 
-       
-
-    //Si no existen datos
-    }else{
-        $response="Data empty";
-    }
-
-    return $response;
-  
+        return $response;
+      
     }
 
 
-    public function updateCard(){
+    public function updateCard()
+    {
 
     }
 }

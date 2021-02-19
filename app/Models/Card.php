@@ -31,7 +31,7 @@ class Card extends Model
      */
     public function users()
     {
-        return $this->belongsTo(User::class); //One to Many inverse
+        return $this->belongsToMany(User::class); //One to Many inverse
     }
 
 

@@ -3,25 +3,31 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-//Registro y login de usuario
-Route::post('register', 'App\Http\Controllers\UserController@signUp');
-Route::post('login', 'App\Http\Controllers\UserController@SignIn');
-Route::post('reset', 'App\Http\Controllers\UserController@resetPass');
-Route::post('createCard','App\Http\Controllers\cardController@createCard');
-Route::post('createCollection','App\Http\Controllers\collectionController@createCollection');
 
+/*
+*Grupo de rutas de usuarios , Registro/Login/Reset_password
+*/
+Route::prefix('users')->group(function (){
+	//Registro y login de usuario
+	Route::post('/register', 'App\Http\Controllers\UserController@signUp');
+	Route::post('/login', 'App\Http\Controllers\UserController@SignIn');
+	Route::post('/reset', 'App\Http\Controllers\UserController@resetPass');
 
-//Autenticacion de usuario
-Route::group(['middleware' => ['jwt.verify']], function() {
+}
+/*
+*Grupo de rutas de cartas , Crear/Editar
+*/
+Route::prefix('cards')->group(function (){
 
-	//Perfil de usuario
-    Route::post('user','App\Http\Controllers\UserController@getAuthenticatedUser');
+	Route::post('/create','App\Http\Controllers\cardController@createCard')->middleware('Admin');
 
+}
+/*
+*Grupo de rutas de colecciones , Crear/Editar
+*/
+Route::prefix('collection')->group(function (){
 
-    //Crear carta
-    // Route::post('create','App\Http\Controllers\cardController@createCard');
-    
+	Route::post('/create','App\Http\Controllers\collectionController@createCollection')->middleware('Admin');
 
-    // Route::post('create','App\Http\Controllers\UserController@createCard');
+}
 
-});

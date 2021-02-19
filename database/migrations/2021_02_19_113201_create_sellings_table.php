@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCardsUsersTable extends Migration
+class CreateSellingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,17 @@ class CreateCardsUsersTable extends Migration
      */
     public function up()
     {
-       
-        Schema::create('cards_users', function (Blueprint $table) {
+         Schema::create('sellings', function (Blueprint $table) {
+            $table->id();
+            $table->integer('price');
+            $table->integer('quantity');
 
-            $table->bigIncrements('id')->nullable(false);
-            $table->unsignedBigInteger('card_id');
-            $table->foreign('card_id')->references('id')->on('cards');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('card_id');
+            $table->foreign('card_id')->references('id')->on('cards');
+
             $table->timestamps();
         });
     }
@@ -32,6 +35,6 @@ class CreateCardsUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cards_users');
+        Schema::dropIfExists('sellings');
     }
 }
