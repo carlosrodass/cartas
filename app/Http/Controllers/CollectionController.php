@@ -9,6 +9,9 @@ use App\Models\Card;
 use App\Models\Collection;
 use App\Models\cardCollection;
 
+use \Firebase\JWT\JWT;
+use App\Http\Helpers\MyJWT;
+
 class CollectionController extends Controller
 {   
     /*
@@ -29,14 +32,18 @@ class CollectionController extends Controller
             $headers = getallheaders();
             $decoded = JWT::decode($headers['token'], $key, array('HS256'));
 
-            $collection = DB::table('collections')
-                ->where('collection_name', '=', $data->collection_name)
-                ->get();
+            $collectionDB = DB::table('collections')
+                ->where('collection_name',$data->collection_name)
+                ->get()->first();
 
 
-            if(!$collection){
+            if($collectionDB){
 
-                 //Relleno los datos de la coleccion
+                $response = response()->json(['Failure' => 'La coleccion con el nombre dado ya existe']);
+
+            }else{
+                
+                //Relleno los datos de la coleccion
                 $collection->collection_name = $data->collection_name; //collection_name
                 $collection->image = $data->image; //image
                 $collection->publish_date = $data->publish_date; //publish_date
@@ -72,10 +79,6 @@ class CollectionController extends Controller
                 
 
                $response = response()->json(['Success' => 'Coleccion creada'], 200);
-
-            }else{
-                
-                $response = response()->json(['Failure' => 'Coleccion ya existe']);
             }
             
             
@@ -90,7 +93,49 @@ class CollectionController extends Controller
     /*
     *editando colecciones
     */
-    public function updateCollection(){
+    public function updateCollection(Request $request){
+
+        
+        $response = "";
+        $data = $request->getContent();
+        $data=json_decode($data);
+
+        //Autenticando el usuario
+        $key = MyJWT::getKey();
+        $headers = getallheaders();                
+        $decoded = JWT::decode($headers['token'], $key, array('HS256'));
+        
+        
+        if($data){
+            
+            $collection = DB::table('collections')->where('collection_name', $data->collection_name)->get()->first();
+
+            if($collection){
+                
+                $collection->collection_name = $data->new_collection_name;
+                $collection->image = $data->new_image;
+                $collection->publish_date = $data->new_publish_date;
+                $collection->user_id = $decoded->id;
+
+                try{
+                    $collection->save();
+                    $response = response()->json(['Success' => 'Carta renombrada'], 200);
+                } catch(\Exception $e){
+                    $response = response()->json(['Error' => $e->getMessage()]);
+                }
+            }
+            else{
+                $response = response()->json(['Failure' => 'La coleccion no existe'], 200);
+            }
+
+          
+
+        }
+        else{
+            $response = response()->json(['Failure' => 'No hay datos'], 200);
+        }
+
+        return $response;
 
     }
 }

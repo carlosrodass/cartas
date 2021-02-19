@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Card;
 
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
