@@ -42,9 +42,9 @@ class CollectionController extends Controller
                 if($collectionDB){
 
                     $response = response()->json(['Failure' => 'La coleccion con el nombre dado ya existe']);
-
-                //Si la coleccion NO existe
-                }else{
+                
+                }
+                else{//Si la coleccion NO existe
                     
                     // creando y rellenando los datos de la coleccion
                     $collection = new Collection();
@@ -81,21 +81,14 @@ class CollectionController extends Controller
                     }catch(\Exception $e){
                         $response = response()->json(['Error' => $e]);
                     }
-                    
-
                    $response = response()->json(['Success' => 'Coleccion creada']);
                 }
-                
-                
-
             }else{
                 $response = response()->json(['Error' => 'No has introducido datos']);
             }
         }else{
             $response = response()->json(['ADMIN' => 'No eres administrador']);
         }
-            
-
         return $response;
     }
 
@@ -104,7 +97,6 @@ class CollectionController extends Controller
     */
     public function updateCollection(Request $request){
 
-        
         $response = "";
         $data = $request->getContent();
         $data=json_decode($data);
@@ -114,14 +106,12 @@ class CollectionController extends Controller
         $headers = getallheaders();                
         $decoded = JWT::decode($headers['token'], $key, array('HS256'));
 
-        
         if($decoded->role == "admin"){
 
             if($data){
                 $collection = Collection::find($data->id);
 
                 if($collection){
-                    
                     $collection->collection_name = $data->new_collection_name;
                     $collection->image = $data->new_image;
                     $collection->publish_date = $data->new_publish_date;
@@ -137,9 +127,6 @@ class CollectionController extends Controller
                 else{
                     $response = response()->json(['Failure' => 'La coleccion no existe']);
                 }
-
-              
-
             }
             else{
                 $response = response()->json(['Failure' => 'No hay datos']);
@@ -148,8 +135,6 @@ class CollectionController extends Controller
             $response = response()->json(['ADMIN' => 'No eres administrador']);
         }
         
-
         return $response;
-
     }
 }

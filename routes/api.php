@@ -10,13 +10,16 @@ use App\Http\Controllers\SellController;
 
 use App\Http\Middleware\Admin;
 use App\Http\Middleware\NonAdmin;
+
 /*
 *Grupo de rutas de usuarios , Registro/Login/Reset_password
 */
 Route::prefix('users')->group(function (){
 
 	Route::post('/register',[UserController::class, 'signUp']);
+
 	Route::post('/login',[UserController::class, 'signIn']);
+
 	Route::put('/reset',[UserController::class, 'resetPass']);
 
 });
@@ -26,8 +29,11 @@ Route::prefix('users')->group(function (){
 Route::prefix('cards')->group(function (){
 
 	Route::post('/create',[CardController::class, 'createCard']);
+
 	Route::put('/update',[CardController::class, 'updateCard']);
+
 	Route::get('/read',[CardController::class, 'allCard']);
+
 	Route::get('/byName/{name}',[CardController::class, 'findCardByName']);
 
 });
@@ -37,7 +43,9 @@ Route::prefix('cards')->group(function (){
 Route::prefix('collection')->group(function (){
 
 	Route::post('/create',[CollectionController::class, 'createCollection']);
+
 	Route::put('/update',[CollectionController::class, 'updateCollection']);
+
 	Route::get('/read',[CollectionController::class, 'allCollection']);
 	
 

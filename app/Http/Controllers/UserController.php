@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
     use App\Models\User;
-    
+
     use App\Http\Helpers\MyJWT;
     use JWTAuth;
     use \Firebase\JWT\JWT;
     use Tymon\JWTAuth\Exceptions\JWTException;
-    
+
     use Illuminate\Http\Request;
     use Illuminate\Support\Str;
     use Illuminate\Support\Facades\DB;
@@ -20,12 +20,12 @@ class UserController extends Controller
 {
 
     /**
-    *Registro de usuario 
+    *Registro de usuario
     */
     public function signUp(Request $request)
     {
         $response = "";
-   
+
         $data = $request->getContent();
         $data = json_decode($data);
 
@@ -55,13 +55,13 @@ class UserController extends Controller
 
 
     /**
-    *Login de usuario 
+    *Login de usuario
     */
     public function SignIn(Request $request)
-    { 
+    {
         $response = "";
         $data = $request->getContent();
-        
+
         $data = json_decode($data);
 
         //Si hay datos
@@ -72,19 +72,18 @@ class UserController extends Controller
             $user = User::where('email', $userEmail)->get()->first();
             //Si el usuario existe
             if($user){
-                
+
                 //Comprobando la contraseña del usuario sea igual que la introducida
                 if(Hash::check($data->password,$user->password)){
 
-
                     $payload = MyJWT::generatePayload($user);
-                    $key = MyJWT::getKey(); 
+                    $key = MyJWT::getKey();
                     //Encodificando los datos del usuario para enviarlos
                     $jwt = JWT::encode($payload, $key);
 
                     try{
-                        $user->save(); 
-                        $response = response()->json(['token' => $jwt], 200);  
+                        $user->save();
+                        $response = response()->json(['token' => $jwt], 200);
 
                     } catch(\Exception $e){
                         $response=$e->getMessage();
@@ -92,7 +91,7 @@ class UserController extends Controller
                 }else{
                     $response = response()->json(['error' => 'Credenciales incorrectas'], 400);
                 }
-                  
+
             //Si el usuario NO existe
             }else{
                 $response = response()->json(['error' => 'Usuario no existe']);
@@ -111,7 +110,7 @@ class UserController extends Controller
     }
 
     /**
-    *Recuperar contraseña de usuario 
+    *Recuperar contraseña de usuario
     */
     public function resetPass(Request $request){
 
@@ -121,21 +120,21 @@ class UserController extends Controller
         $data = $request->getContent();
         // Decodificar el json
         $data = json_decode($data);
-       
+
 
         if($data){
              //Buscando usuario por email
             $user = User::where('email', $data->email)->get()->first();
             //Si existe el usuario
             if($user) {
-                
+
                 $password= "";
                 //Generar nueva contraseña
                 $password = Str::random(15);
                 //Reseteando contraseña
                 $user->password = Hash::make($password);
                 $user->password = $password;
-                
+
                 try{
                     //Guardando contraseña
                     $user->save();
@@ -157,4 +156,3 @@ class UserController extends Controller
 
     }
 }
-  
