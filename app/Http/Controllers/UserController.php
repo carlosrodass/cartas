@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
     use App\Models\User;
+    
     use App\Http\Helpers\MyJWT;
-    use Illuminate\Support\Str;
-    use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\DB;
-    use Illuminate\Support\Facades\Hash;
-    use Illuminate\Support\Facades\Validator;
     use JWTAuth;
     use \Firebase\JWT\JWT;
     use Tymon\JWTAuth\Exceptions\JWTException;
+    
+    use Illuminate\Http\Request;
+    use Illuminate\Support\Str;
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Hash;
+    use Illuminate\Support\Facades\Validator;
+
 
 class UserController extends Controller
 {
