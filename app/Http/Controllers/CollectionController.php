@@ -30,7 +30,7 @@ class CollectionController extends Controller
         $decoded = JWT::decode($headers['token'], $key, array('HS256'));
 
         //Si el usuario es admin
-        if($decoded->id == "admin"){
+        if($decoded->role == "admin"){
             //Si existen datos
             if($data){
 

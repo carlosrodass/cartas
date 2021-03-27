@@ -192,7 +192,6 @@ class CardController extends Controller
                 ];
 
             }
-            
         }
         else{
             $response = response()->json(['Error' => 'No te has logueado']);

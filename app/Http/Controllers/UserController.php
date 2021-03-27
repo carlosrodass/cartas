@@ -24,8 +24,7 @@ class UserController extends Controller
     */
     public function signUp(Request $request)
     {
-        $response = "";
-
+    
         $data = $request->getContent();
         $data = json_decode($data);
 
@@ -38,19 +37,16 @@ class UserController extends Controller
 
             try{
                 $user->save();
-                $response = response()->json(['Success' => 'Usuario registrado']);
+                return response()->json(['Success' => 'Usuario registrado']);
 
             }catch(\Exception $e){
                 $fail=$e->getMessage();
-                $response = response()->json(['Error' => $fail]);
+                return response()->json(['Error' => $fail]);
             }
 
         }else{
-            $response = response()->json(['Empty' => 'No has introducido datos']);
+            return response()->json(['Empty' => 'No has introducido datos']);
         }
-
-
-        return $response;
     }
 
 
@@ -83,30 +79,25 @@ class UserController extends Controller
 
                     try{
                         $user->save();
-                        $response = response()->json(['token' => $jwt], 200);
+                        return response()->json(['token' => $jwt], 200);
 
                     } catch(\Exception $e){
-                        $response=$e->getMessage();
+                        // $response=$e->getMessage();
+                        return response()->json(['Message' => $e->getMessage()]);
                     }
                 }else{
-                    $response = response()->json(['error' => 'Credenciales incorrectas'], 400);
+                    return response()->json(['error' => 'Credenciales incorrectas'], 400);
                 }
 
             //Si el usuario NO existe
             }else{
-                $response = response()->json(['error' => 'Usuario no existe']);
+                return response()->json(['error' => 'Usuario no existe']);
 
             }
-
-
         //Si NO hay datos
-        }else{
-            // $response = "No hay datos introducidos";
-            $response = response()->json(['error' => 'Introduce los datos']);
         }
-
-
-        return $response;
+        return response()->json(['error' => 'Introduce los datos']);
+       
     }
 
     /**
